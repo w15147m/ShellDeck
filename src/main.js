@@ -1,6 +1,6 @@
 import { app, globalShortcut, Menu } from 'electron';
 import started from 'electron-squirrel-startup';
-import electronManager from './electron-manager';
+import electronManager from './services/electron.api.js';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

@@ -9,8 +9,8 @@ import {
   MIN_WINDOW_HEIGHT, 
   STANDALONE_WIDTH, 
   STANDALONE_HEIGHT 
-} from './common/constants.js';
-import DbManager from './db-manager.js';
+} from '../common/constants.js';
+import DbManager from './db.api.js';
 
 class ElectronManager {
   constructor() {
