@@ -238,84 +238,96 @@ class ElectronManager {
   }
 
   registerIpcHandlers() {
-    ipcMain.on('window-minimize', (event) => {
-      const win = BrowserWindow.fromWebContents(event.sender);
-      if (win && !win.isDestroyed()) win.minimize();
-    });
+    try {
+      console.log('IPC: Initializing Handlers...');
 
-    ipcMain.on('window-set-size', (event, { width, height }) => {
-      const win = BrowserWindow.fromWebContents(event.sender);
-      if (win && !win.isDestroyed()) {
-        const bounds = win.getBounds();
-        win.setBounds({ 
-          x: bounds.x, 
-          y: bounds.y, 
-          width: Math.ceil(width), 
-          height: Math.ceil(height) 
-        }, true);
-      }
-    });
+      // Database Handlers (Prioritized)
+      console.log('IPC: Registering db-get-items');
+      ipcMain.handle('db-get-items', () => {
+        return this.db.getItems();
+      });
 
-    ipcMain.on('window-close', (event) => {
-      const win = BrowserWindow.fromWebContents(event.sender);
-      if (win && !win.isDestroyed()) {
-        if (win === this.mainWindow) {
-          win.hide();
-        } else {
-          win.close();
+      console.log('IPC: Registering db-save-item');
+      ipcMain.handle('db-save-item', (event, item) => {
+        return this.db.saveItem(item);
+      });
+
+      console.log('IPC: Registering db-delete-item');
+      ipcMain.handle('db-delete-item', (event, id) => {
+        return this.db.deleteItem(id);
+      });
+
+      // Window Handlers
+      ipcMain.on('window-minimize', (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (win && !win.isDestroyed()) win.minimize();
+      });
+
+      ipcMain.on('window-set-size', (event, { width, height }) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (win && !win.isDestroyed()) {
+          const bounds = win.getBounds();
+          win.setBounds({ 
+            x: bounds.x, 
+            y: bounds.y, 
+            width: Math.ceil(width), 
+            height: Math.ceil(height) 
+          }, true);
         }
-      }
-    });
+      });
 
-    ipcMain.on('window-set-height', (event, height) => {
-      const win = BrowserWindow.fromWebContents(event.sender);
-      if (!win || win.isDestroyed()) return;
+      ipcMain.on('window-close', (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (win && !win.isDestroyed()) {
+          if (win === this.mainWindow) {
+            win.hide();
+          } else {
+            win.close();
+          }
+        }
+      });
 
-      const bounds = win.getBounds();
-      if (bounds.width <= 100) return;
+      ipcMain.on('window-set-height', (event, height) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (!win || win.isDestroyed()) return;
 
-      const heightToSet = Math.min(Math.max(height, MIN_WINDOW_HEIGHT), MAX_WINDOW_HEIGHT);
-      
-      if (bounds.height !== heightToSet) {
-        win.setResizable(true);
-        win.setBounds({ 
-          x: bounds.x, 
-          y: bounds.y, 
-          width: bounds.width, 
-          height: heightToSet 
-        }, true);
-        win.setResizable(false);
-      }
-    });
+        const bounds = win.getBounds();
+        if (bounds.width <= 100) return;
 
-    ipcMain.handle('get-app-settings', () => {
-      return this.loadAppSettings();
-    });
+        const heightToSet = Math.min(Math.max(height, MIN_WINDOW_HEIGHT), MAX_WINDOW_HEIGHT);
+        
+        if (bounds.height !== heightToSet) {
+          win.setResizable(true);
+          win.setBounds({ 
+            x: bounds.x, 
+            y: bounds.y, 
+            width: bounds.width, 
+            height: heightToSet 
+          }, true);
+          win.setResizable(false);
+        }
+      });
 
-    ipcMain.handle('update-app-settings', (event, settings) => {
-      this.saveAppSettings(settings);
-      const alwaysOnTop = !!settings.alwaysOnTop;
-      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-        this.mainWindow.setAlwaysOnTop(alwaysOnTop);
-      }
-    });
+      ipcMain.handle('get-app-settings', () => {
+        return this.loadAppSettings();
+      });
 
-    ipcMain.handle('get-app-version', () => {
-      return `v${app.getVersion()}`;
-    });
+      ipcMain.handle('update-app-settings', (event, settings) => {
+        this.saveAppSettings(settings);
+        const alwaysOnTop = !!settings.alwaysOnTop;
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          this.mainWindow.setAlwaysOnTop(alwaysOnTop);
+        }
+      });
 
-    // Database Handlers
-    ipcMain.handle('db-get-items', () => {
-      return this.db.getItems();
-    });
+      ipcMain.handle('get-app-version', () => {
+        return `v${app.getVersion()}`;
+      });
 
-    ipcMain.handle('db-save-item', (event, item) => {
-      return this.db.saveItem(item);
-    });
-
-    ipcMain.handle('db-delete-item', (event, id) => {
-      return this.db.deleteItem(id);
-    });
+      console.log('IPC: Handlers registration complete.');
+    } catch (err) {
+      console.error('IPC: Handlers registration FAILURE:', err);
+    }
   }
 
   updateLoginItemSettings(enabled = null) {

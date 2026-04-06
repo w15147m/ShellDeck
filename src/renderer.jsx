@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import Home from './pages/Home';
+import Home from './pages/Home/Home';
 import './index.css';
 
 const App = () =>{

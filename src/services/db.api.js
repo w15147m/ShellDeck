@@ -55,6 +55,7 @@ class DbManager {
 
   saveItem(item) {
     try {
+      console.log('DbManager: Saving item...', item);
       if (item.id) {
         // Update existing item
         const stmt = this.db.prepare(`
@@ -62,7 +63,7 @@ class DbManager {
           SET title = ?, content = ?, status = ?, statusColor = ?, starred = ?, date = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `);
-        stmt.run(
+        const info = stmt.run(
           item.title, 
           item.content, 
           item.status, 
@@ -71,6 +72,7 @@ class DbManager {
           item.date, 
           item.id
         );
+        console.log('DbManager: Update successful, changes:', info.changes);
         return item.id;
       } else {
         // Insert new item
@@ -86,11 +88,12 @@ class DbManager {
           item.starred ? 1 : 0, 
           item.date
         );
+        console.log('DbManager: Insert successful, ID:', result.lastInsertRowid);
         return result.lastInsertRowid;
       }
     } catch (err) {
-      console.error('Error saving item:', err);
-      return null;
+      console.error('DbManager: Save error:', err);
+      throw err; // Re-throw to propagate to IPC handler
     }
   }
 
