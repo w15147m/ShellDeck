@@ -7,6 +7,7 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
     content: '',
     needsInput: false,
     needsLocation: false,
+    needsSudo: false,
     status: 'To-do',
     statusColor: 'blue',
     starred: false,
@@ -15,7 +16,23 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
 
   useEffect(() => {
     if (item) {
-      setFormData(item);
+      setFormData({
+        title: '',
+        content: '',
+        needsInput: false,
+        needsLocation: false,
+        needsSudo: false,
+        status: 'To-do',
+        statusColor: 'blue',
+        starred: false,
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+        ...item,
+        // Ensure booleans are always proper booleans, not 0/1 from SQLite
+        needsInput: !!item.needsInput,
+        needsLocation: !!item.needsLocation,
+        needsSudo: !!item.needsSudo,
+        starred: !!item.starred,
+      });
     }
   }, [item]);
 
@@ -115,6 +132,18 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
             </span>
             <div className={`w-9 h-5 rounded-full relative transition-colors ${formData.needsLocation ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
               <div className={`absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform ${formData.needsLocation ? 'translate-x-full border-white' : ''}`}></div>
+            </div>
+          </div>
+          
+          <div 
+            onClick={() => setFormData(prev => ({ ...prev, needsSudo: !prev.needsSudo }))}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <span className="text-xs font-bold text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors uppercase tracking-wider select-none">
+              Requires Root / Sudo
+            </span>
+            <div className={`w-9 h-5 rounded-full relative transition-colors ${formData.needsSudo ? 'bg-red-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+              <div className={`absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform ${formData.needsSudo ? 'translate-x-full border-white' : ''}`}></div>
             </div>
           </div>
         </div>

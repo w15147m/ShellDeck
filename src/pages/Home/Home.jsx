@@ -5,6 +5,7 @@ import SettingsModal from "../../common/components/SettingsModal";
 import ItemCard from "./components/ItemCard";
 import ItemEditor from "./components/ItemEditor";
 import ExecutionModal from "./components/ExecutionModal";
+import CommandOutputModal from "./components/CommandOutputModal";
 import NoData from "../../common/components/NoData";
 import { ThemeProvider } from "../../common/context/ThemeContext";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../../common/constants";
@@ -19,6 +20,8 @@ const Home = () => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [pendingExecutionItem, setPendingExecutionItem] = useState(null);
+  const [executingItemId, setExecutingItemId] = useState(null);
+  const [commandOutputState, setCommandOutputState] = useState(null);
   const [appVersion, setAppVersion] = useState('');
   
   const containerRef = useRef(null);
@@ -101,27 +104,33 @@ const Home = () => {
   };
 
   const handleRunCommand = (item) => {
-    if (item.needsInput || item.needsLocation) {
+    if (item.needsInput || item.needsLocation || item.needsSudo) {
       setPendingExecutionItem(item);
       return;
     }
-    executeFinalCommand(item.content);
+    executeFinalCommand(item.content, item.id, item.title);
   };
 
-  const executeFinalCommand = async (commandText) => {
+  const executeFinalCommand = async (commandText, itemId, itemTitle) => {
     try {
       if (!commandText?.trim()) return toastError("No command text found to run.");
       
+      if (itemId) setExecutingItemId(itemId);
       const result = await window.electron.executeCommand(commandText);
+      if (itemId) setExecutingItemId(null);
       
       if (result.success) {
         toastSuccess("Process Finished");
         console.log("Bash Output:", result.output);
+        // Uncomment below to show success dumps
+        // setCommandOutputState({ title: itemTitle, output: result.output, error: null, isSuccess: true });
       } else {
         toastError("Process Failed");
         console.error("Bash Error:", result.error);
+        setCommandOutputState({ title: itemTitle, output: null, error: result.error, isSuccess: false });
       }
     } catch (err) {
+      if (itemId) setExecutingItemId(null);
       toastError("Failed to communicate with bridge.");
     }
   };
@@ -176,7 +185,8 @@ const Home = () => {
                   onEdit={handleEditItem}
                   onDelete={handleDeleteItem}
                   onToggleStar={handleToggleStar}
-                  onRun={handleRunCommand}
+                  onRun={() => handleRunCommand(item)}
+                  isExecuting={executingItemId === item.id}
                 />
               ))}
             </div>
@@ -209,21 +219,21 @@ const Home = () => {
         <ExecutionModal
           item={pendingExecutionItem}
           onProceed={(finalCommand) => {
+            const tempId = pendingExecutionItem.id;
+            const tempTitle = pendingExecutionItem.title;
             setPendingExecutionItem(null);
-            executeFinalCommand(finalCommand);
+            executeFinalCommand(finalCommand, tempId, tempTitle);
           }}
           onClose={() => setPendingExecutionItem(null)}
         />
       )}
 
-      {pendingExecutionItem && (
-        <ExecutionModal
-          item={pendingExecutionItem}
-          onProceed={(finalCommand) => {
-            setPendingExecutionItem(null);
-            executeFinalCommand(finalCommand);
-          }}
-          onClose={() => setPendingExecutionItem(null)}
+      {commandOutputState && (
+        <CommandOutputModal
+          title={commandOutputState.title}
+          output={commandOutputState.output}
+          error={commandOutputState.error}
+          onClose={() => setCommandOutputState(null)}
         />
       )}
 

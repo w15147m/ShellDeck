@@ -31,6 +31,7 @@ class DbManager {
           starred INTEGER DEFAULT 0,
           needsInput INTEGER DEFAULT 0,
           needsLocation INTEGER DEFAULT 0,
+          needsSudo INTEGER DEFAULT 0,
           date TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -38,12 +39,9 @@ class DbManager {
       `);
 
       // Migration: Add columns to existing DB if it already existed
-      try {
-        this.db.exec(`ALTER TABLE items ADD COLUMN needsInput INTEGER DEFAULT 0;`);
-        this.db.exec(`ALTER TABLE items ADD COLUMN needsLocation INTEGER DEFAULT 0;`);
-      } catch (err) {
-        // Expected if columns already exist
-      }
+      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsInput INTEGER DEFAULT 0;`); } catch (err) {}
+      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsLocation INTEGER DEFAULT 0;`); } catch (err) {}
+      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsSudo INTEGER DEFAULT 0;`); } catch (err) {}
     } catch (err) {
       console.error('Failed to initialize database:', err);
     }
@@ -57,7 +55,8 @@ class DbManager {
         ...item,
         starred: Boolean(item.starred),
         needsInput: Boolean(item.needsInput),
-        needsLocation: Boolean(item.needsLocation)
+        needsLocation: Boolean(item.needsLocation),
+        needsSudo: Boolean(item.needsSudo)
       }));
     } catch (err) {
       console.error('Error fetching items:', err);
@@ -72,7 +71,7 @@ class DbManager {
         // Update existing item
         const stmt = this.db.prepare(`
           UPDATE items 
-          SET title = ?, content = ?, status = ?, statusColor = ?, starred = ?, needsInput = ?, needsLocation = ?, date = ?, updated_at = CURRENT_TIMESTAMP
+          SET title = ?, content = ?, status = ?, statusColor = ?, starred = ?, needsInput = ?, needsLocation = ?, needsSudo = ?, date = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `);
         const info = stmt.run(
@@ -83,6 +82,7 @@ class DbManager {
           item.starred ? 1 : 0, 
           item.needsInput ? 1 : 0,
           item.needsLocation ? 1 : 0,
+          item.needsSudo ? 1 : 0,
           item.date, 
           item.id
         );
@@ -91,8 +91,8 @@ class DbManager {
       } else {
         // Insert new item
         const stmt = this.db.prepare(`
-          INSERT INTO items (title, content, status, statusColor, starred, needsInput, needsLocation, date)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO items (title, content, status, statusColor, starred, needsInput, needsLocation, needsSudo, date)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
         const result = stmt.run(
           item.title, 
@@ -102,6 +102,7 @@ class DbManager {
           item.starred ? 1 : 0, 
           item.needsInput ? 1 : 0,
           item.needsLocation ? 1 : 0,
+          item.needsSudo ? 1 : 0,
           item.date
         );
         console.log('DbManager: Insert successful, ID:', result.lastInsertRowid);
