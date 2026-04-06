@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ItemCard = ({ item, onEdit, onDelete, onToggleStar }) => {
+const ItemCard = ({ item, onEdit, onDelete, onToggleStar, onRun }) => {
   return (
     <div className="p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-between group transition-all hover:border-brand-500/30">
       <div className="flex items-center gap-4">
@@ -24,7 +24,7 @@ const ItemCard = ({ item, onEdit, onDelete, onToggleStar }) => {
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-md line-clamp-2">
+          <p className="text-sm font-mono text-gray-500 dark:text-gray-400 leading-relaxed max-w-md line-clamp-2">
             {item.content}
           </p>
           <div className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
@@ -34,6 +34,15 @@ const ItemCard = ({ item, onEdit, onDelete, onToggleStar }) => {
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button 
+          onClick={() => onRun && onRun(item)}
+          className="p-2 text-white bg-green-500 hover:bg-green-600 shadow-md rounded-lg transition-all mx-2"
+          title="Run Command"
+        >
+          <svg className="size-5 pl-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
         <button 
           onClick={() => onEdit(item)}
           className="p-2 text-gray-400 hover:text-brand-500 hover:bg-brand-50 rounded-lg transition-all"

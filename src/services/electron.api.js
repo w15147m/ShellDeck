@@ -2,6 +2,11 @@ import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage, globalSh
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
+import { exec } from 'node:child_process';
+import util from 'node:util';
+
+const execAsync = util.promisify(exec);
+
 import { 
   WINDOW_WIDTH, 
   DEFAULT_HEIGHT, 
@@ -258,6 +263,18 @@ class ElectronManager {
       console.log('IPC: Registering db-get-items');
       ipcMain.handle('db-get-items', () => {
         return this.db.getItems();
+      });
+
+      console.log('IPC: Registering execute-command');
+      ipcMain.handle('execute-command', async (event, commandStr) => {
+        try {
+          const { stdout, stderr } = await execAsync(commandStr);
+          if (stderr) console.warn('Command Warning:', stderr);
+          return { success: true, output: stdout };
+        } catch (error) {
+          console.error('Command Error:', error);
+          return { success: false, error: error.message };
+        }
       });
 
       console.log('IPC: Registering db-save-item');

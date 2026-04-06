@@ -98,6 +98,25 @@ const Home = () => {
     setActiveFilter("All");
   };
 
+  const handleRunCommand = async (item) => {
+    try {
+      const command = item.content || '';
+      if (!command.trim()) return toastError("No command text found to run.");
+      
+      const result = await window.electron.executeCommand(command);
+      
+      if (result.success) {
+        toastSuccess("Process Finished");
+        console.log("Bash Output:", result.output);
+      } else {
+        toastError("Process Failed");
+        console.error("Bash Error:", result.error);
+      }
+    } catch (err) {
+      toastError("Failed to communicate with bridge.");
+    }
+  };
+
   const filteredItems = items.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          item.content.toLowerCase().includes(searchQuery.toLowerCase());
@@ -148,6 +167,7 @@ const Home = () => {
                   onEdit={handleEditItem}
                   onDelete={handleDeleteItem}
                   onToggleStar={handleToggleStar}
+                  onRun={handleRunCommand}
                 />
               ))}
             </div>
