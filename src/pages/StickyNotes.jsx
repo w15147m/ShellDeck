@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import NoteCard from "./components/NoteCard";
 import NoteEditor from "./components/NoteEditor";
-import StickyHeader from "./components/StickyHeader";
+import AppHeader from "../common/components/AppHeader";
 import FilterBar from "./components/FilterBar";
 import SettingsModal from "../common/components/SettingsModal";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../common/constants";
@@ -228,14 +228,15 @@ const StickyNotes = () => {
           maxHeight: `${MAX_WINDOW_HEIGHT - APP_PADDING}px`,
         }}
       >
-        <StickyHeader
+        <AppHeader
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           isFilterMenuOpen={isFilterMenuOpen}
           setIsFilterMenuOpen={setIsFilterMenuOpen}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          onAddNote={handleAddNote}
+          filterOptions={['All', 'To-do', 'Presentation', 'Hot Fix', 'Ready to Present']}
+          activeFilter={statusFilter}
+          onFilterChange={setStatusFilter}
+          onAction={handleAddNote}
           onClose={() => window.electron.close()}
           onToggleSettings={() => setIsSettingsOpen(true)}
         />
