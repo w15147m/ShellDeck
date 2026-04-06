@@ -305,7 +305,9 @@ class ElectronManager {
 
         console.log('IPC: Executing streaming command:', processedCommand);
         
-        this.activeChild = spawn(processedCommand, [], { shell: true });
+        this.activeChild = spawn(processedCommand, [], { 
+          shell: true
+        });
 
         this.activeChild.stdout.on('data', (data) => {
           safeSend('command-output', { type: 'stdout', data: data.toString() });

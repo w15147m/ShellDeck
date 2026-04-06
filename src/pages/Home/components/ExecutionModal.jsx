@@ -4,6 +4,7 @@ import Modal from '../../../common/components/Modal';
 const ExecutionModal = ({ item, onProceed, onClose }) => {
   const [inputValue, setInputValue] = useState('');
   const [locationValue, setLocationValue] = useState('');
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   const handlePickLocation = async () => {
     try {
@@ -16,16 +17,19 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
         });
         
         if (selectedPath) {
-          setLocationValue(selectedPath);
+          // Extract directory and filename separately
+          const pathParts = selectedPath.split(/[/\\]/);
+          const fileName = pathParts.pop();
+          const dirPath = pathParts.join('/') || '/';
+          
+          setLocationValue(dirPath);
+          setSelectedFileName(fileName || '');
           
           // Auto-fill target name from filename if it's currently empty
-          if (item.needsInput && !inputValue) {
-            const fileName = selectedPath.split(/[/\\]/).pop();
-            if (fileName) {
-              // Remove extension for a cleaner name
-              const cleanName = fileName.includes('.') ? fileName.split('.').slice(0, -1).join('.') : fileName;
-              setInputValue(cleanName || fileName);
-            }
+          if (item.needsInput && !inputValue && fileName) {
+            // Remove extension for a cleaner name in the 'Target' box
+            const cleanName = fileName.includes('.') ? fileName.split('.').slice(0, -1).join('.') : fileName;
+            setInputValue(cleanName || fileName);
           }
         }
       }
@@ -34,16 +38,25 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
     }
   };
 
-  const handleProceed = () => {
-    let finalCommand = item.content;
+  const getFinalCommand = () => {
+    let base = item.content;
     if (item.needsInput && inputValue) {
-      finalCommand += ` ${inputValue}`;
+      base += ` ${inputValue}`;
     }
+    
     if (item.needsLocation && locationValue) {
-      finalCommand += ` "${locationValue}"`;
+      const filePart = selectedFileName ? `./${selectedFileName}` : '';
+      return `cd "${locationValue}" && ${base} ${filePart}`;
     }
-    onProceed(finalCommand);
+    
+    return base;
   };
+
+  const handleProceed = () => {
+    onProceed(getFinalCommand());
+  };
+
+  const previewCommand = getFinalCommand();
 
   const isProceedDisabled = 
     (item.needsInput && !inputValue.trim()) || 
@@ -91,6 +104,18 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
             />
           </div>
         )}
+
+        <div className="space-y-1.5 pt-2">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Live Command Preview</label>
+          <div className="bg-gray-900 dark:bg-black/40 border border-gray-200 dark:border-gray-800 rounded-xl p-3 shadow-inner overflow-hidden">
+            <div className="flex gap-2">
+              <span className="text-brand-500 font-mono text-xs font-bold shrink-0">$</span>
+              <code className="text-xs font-mono text-gray-300 dark:text-gray-400 break-all leading-relaxed whitespace-pre-wrap">
+                {previewCommand}
+              </code>
+            </div>
+          </div>
+        </div>
 
         <div className="flex items-center gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button 
