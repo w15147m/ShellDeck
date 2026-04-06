@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld('electron', {
   dbGetItems: () => ipcRenderer.invoke('db-get-items'),
   dbSaveItem: (item) => ipcRenderer.invoke('db-save-item', item),
   dbDeleteItem: (id) => ipcRenderer.invoke('db-delete-item', id),
+  pickPath: (options) => ipcRenderer.invoke('pick-path', options),
 });

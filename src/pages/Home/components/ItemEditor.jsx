@@ -5,6 +5,8 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    needsInput: false,
+    needsLocation: false,
     status: 'To-do',
     statusColor: 'blue',
     starred: false,
@@ -89,6 +91,27 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
               }
             }}
           />
+        </div>
+
+        <div className="flex items-center gap-4 py-2 border-t border-gray-100 dark:border-gray-800">
+          <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-500 dark:text-gray-400">
+            <input 
+              type="checkbox" 
+              checked={formData.needsInput}
+              onChange={(e) => setFormData({ ...formData, needsInput: e.target.checked })}
+              className="rounded text-brand-500 focus:ring-brand-500 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 w-4 h-4"
+            />
+            Need Target Name
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-gray-500 dark:text-gray-400">
+            <input 
+              type="checkbox" 
+              checked={formData.needsLocation}
+              onChange={(e) => setFormData({ ...formData, needsLocation: e.target.checked })}
+              className="rounded text-brand-500 focus:ring-brand-500 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 w-4 h-4"
+            />
+            Need File/Location
+          </label>
         </div>
 
         <div className="flex items-center gap-3 pt-2">

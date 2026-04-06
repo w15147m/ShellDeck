@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage, globalShortcut } from 'electron';
+import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage, globalShortcut, dialog } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -352,6 +352,13 @@ class ElectronManager {
 
       ipcMain.handle('get-app-version', () => {
         return `v${app.getVersion()}`;
+      });
+
+      ipcMain.handle('pick-path', async (event, options) => {
+        const result = await dialog.showOpenDialog(options || {
+          properties: ['openFile', 'openDirectory']
+        });
+        return result.canceled ? null : result.filePaths[0];
       });
 
       console.log('IPC: Handlers registration complete.');

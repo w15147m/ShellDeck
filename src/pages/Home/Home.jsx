@@ -4,6 +4,7 @@ import FilterBar from "../../common/components/FilterBar";
 import SettingsModal from "../../common/components/SettingsModal";
 import ItemCard from "./components/ItemCard";
 import ItemEditor from "./components/ItemEditor";
+import ExecutionModal from "./components/ExecutionModal";
 import NoData from "../../common/components/NoData";
 import { ThemeProvider } from "../../common/context/ThemeContext";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../../common/constants";
@@ -17,6 +18,7 @@ const Home = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [pendingExecutionItem, setPendingExecutionItem] = useState(null);
   const [appVersion, setAppVersion] = useState('');
   
   const containerRef = useRef(null);
@@ -98,12 +100,19 @@ const Home = () => {
     setActiveFilter("All");
   };
 
-  const handleRunCommand = async (item) => {
+  const handleRunCommand = (item) => {
+    if (item.needsInput || item.needsLocation) {
+      setPendingExecutionItem(item);
+      return;
+    }
+    executeFinalCommand(item.content);
+  };
+
+  const executeFinalCommand = async (commandText) => {
     try {
-      const command = item.content || '';
-      if (!command.trim()) return toastError("No command text found to run.");
+      if (!commandText?.trim()) return toastError("No command text found to run.");
       
-      const result = await window.electron.executeCommand(command);
+      const result = await window.electron.executeCommand(commandText);
       
       if (result.success) {
         toastSuccess("Process Finished");
@@ -193,6 +202,28 @@ const Home = () => {
           onSave={handleSaveItem}
           onDelete={(id) => { handleDeleteItem(id); setIsEditorOpen(false); }}
           onClose={() => setIsEditorOpen(false)}
+        />
+      )}
+
+      {pendingExecutionItem && (
+        <ExecutionModal
+          item={pendingExecutionItem}
+          onProceed={(finalCommand) => {
+            setPendingExecutionItem(null);
+            executeFinalCommand(finalCommand);
+          }}
+          onClose={() => setPendingExecutionItem(null)}
+        />
+      )}
+
+      {pendingExecutionItem && (
+        <ExecutionModal
+          item={pendingExecutionItem}
+          onProceed={(finalCommand) => {
+            setPendingExecutionItem(null);
+            executeFinalCommand(finalCommand);
+          }}
+          onClose={() => setPendingExecutionItem(null)}
         />
       )}
 
