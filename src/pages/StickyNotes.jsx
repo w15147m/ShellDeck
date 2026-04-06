@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import NoteCard from "./components/NoteCard";
 import NoteEditor from "./components/NoteEditor";
 import AppHeader from "../common/components/AppHeader";
-import FilterBar from "./components/FilterBar";
+import FilterBar from "../common/components/FilterBar";
 import SettingsModal from "../common/components/SettingsModal";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../common/constants";
 import { ThemeProvider } from "../common/context/ThemeContext";
