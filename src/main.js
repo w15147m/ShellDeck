@@ -13,14 +13,7 @@ Menu.setApplicationMenu(null);
 // Initialize Electron Manager
 electronManager.init();
 
-// Global shortcuts
-app.whenReady().then(() => {
-  globalShortcut.register('123123', () => {
-    if (electronManager.mainWindow) {
-      electronManager.mainWindow.webContents.toggleDevTools();
-    }
-  });
-});
+// Global shortcuts can be registered here in the future
 
 // Quit when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {

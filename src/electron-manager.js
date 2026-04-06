@@ -15,7 +15,6 @@ class ElectronManager {
   constructor() {
     this.mainWindow = null;
     this.tray = null;
-    this.standaloneWindows = new Map();
     this.WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
     this.STANDALONE_STATES_PATH = path.join(app.getPath('userData'), 'standalone-states.json');
     this.APP_SETTINGS_PATH = path.join(app.getPath('userData'), 'app-settings.json');
@@ -44,7 +43,6 @@ class ElectronManager {
       this.setupWebRequests();
       this.createMainWindow();
       this.createTray();
-      this.autoOpenPinnedNotes();
       this.updateLoginItemSettings();
     });
 
@@ -236,59 +234,6 @@ class ElectronManager {
     }
   }
 
-  createStandaloneNoteWindow(noteId, noteTitle = 'Note') {
-    if (this.standaloneWindows.has(noteId)) {
-      const existingWindow = this.standaloneWindows.get(noteId);
-      if (!existingWindow.isDestroyed()) {
-        existingWindow.close();
-        return;
-      }
-    }
-
-    const standaloneStates = this.loadStandaloneStates();
-    const savedState = standaloneStates[noteId];
-    const iconPath = path.join(app.getAppPath(), 'assets/icons/icon.png');
-
-    const standaloneWindow = new BrowserWindow({
-      x: savedState?.x,
-      y: savedState?.y,
-      width: savedState?.width || STANDALONE_WIDTH,
-      height: savedState?.height || STANDALONE_HEIGHT,
-      frame: false,
-      transparent: true,
-      alwaysOnTop: !!this.loadAppSettings().alwaysOnTop,
-      skipTaskbar: true,
-      backgroundColor: '#00000000',
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-      },
-      icon: iconPath,
-      title: noteTitle,
-    });
-
-    let saveTimeout;
-    const save = () => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => this.saveStandaloneState(noteId, standaloneWindow), 200);
-    };
-    standaloneWindow.on('move', save);
-    standaloneWindow.on('resize', save);
-    standaloneWindow.on('close', () => {
-      this.saveStandaloneState(noteId, standaloneWindow);
-    });
-
-    const url = MAIN_WINDOW_VITE_DEV_SERVER_URL 
-      ? `${MAIN_WINDOW_VITE_DEV_SERVER_URL}?mode=standalone&id=${noteId}`
-      : `file://${path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)}?mode=standalone&id=${noteId}`;
-
-    standaloneWindow.loadURL(url);
-    this.standaloneWindows.set(noteId, standaloneWindow);
-
-    standaloneWindow.on('closed', () => {
-      this.standaloneWindows.delete(noteId);
-    });
-  }
-
   registerIpcHandlers() {
     ipcMain.on('window-minimize', (event) => {
       const win = BrowserWindow.fromWebContents(event.sender);
@@ -340,23 +285,6 @@ class ElectronManager {
       }
     });
 
-    ipcMain.on('note-detach', (event, note) => {
-      this.createStandaloneNoteWindow(note.id, note.title);
-    });
-
-    ipcMain.on('note-set-pinned', (event, { noteId, pinned }) => {
-      this.saveStandaloneState(noteId, null, pinned);
-      // We no longer auto-update login settings here based on pins alone.
-      // The user must explicitly enable "Launch on Startup" in settings.
-    });
-
-    ipcMain.on('note-toggle-always-on-top', (event, { noteId, isAlwaysOnTop }) => {
-      const win = this.standaloneWindows.get(parseInt(noteId));
-      if (win && !win.isDestroyed()) {
-        win.setAlwaysOnTop(isAlwaysOnTop);
-      }
-    });
-
     ipcMain.handle('get-app-settings', () => {
       return this.loadAppSettings();
     });
@@ -367,48 +295,11 @@ class ElectronManager {
       if (this.mainWindow && !this.mainWindow.isDestroyed()) {
         this.mainWindow.setAlwaysOnTop(alwaysOnTop);
       }
-      for (const win of this.standaloneWindows.values()) {
-        if (win && !win.isDestroyed()) {
-          win.setAlwaysOnTop(alwaysOnTop);
-        }
-      }
     });
 
     ipcMain.handle('get-app-version', () => {
       return `v${app.getVersion()}`;
     });
-
-    ipcMain.on('note-delete', (event, noteId) => {
-      // 1. Close the window if open
-      if (this.standaloneWindows.has(noteId)) {
-        const win = this.standaloneWindows.get(noteId);
-        if (win && !win.isDestroyed()) {
-          win.close();
-        }
-        this.standaloneWindows.delete(noteId);
-      }
-
-      // 2. Clear from persistent states
-      try {
-        const states = this.loadStandaloneStates();
-        if (states[noteId]) {
-          delete states[noteId];
-          fs.writeFileSync(this.STANDALONE_STATES_PATH, JSON.stringify(states));
-        }
-      } catch (err) {
-        console.error('Failed to clear state for deleted note:', err);
-      }
-    });
-  }
-
-  autoOpenPinnedNotes() {
-    const states = this.loadStandaloneStates();
-    Object.keys(states).forEach(id => {
-      if (states[id].pinned) {
-        this.createStandaloneNoteWindow(parseInt(id));
-      }
-    });
-    // We don't call updateLoginItemSettings here anymore
   }
 
   updateLoginItemSettings(enabled = null) {

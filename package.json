@@ -1,6 +1,5 @@
 {
   "name": "sticky-notes",
-  "type": "module",
   "productName": "Sticky Notes",
   "version": "1.0.4",
   "description": "A simple and elegant sticky notes application for your desktop.",
