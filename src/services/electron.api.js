@@ -298,10 +298,9 @@ class ElectronManager {
         let processedCommand = commandStr.trim();
         
         // Auto-handle sudo: inject -S to read from stdin (our app) instead of TTY
-        // We use -S and a blank prompt so the prompt text itself doesn't clutter our UI,
-        // but it still waits for input on stdin.
+        // We removed -p "" because users NEED to see the prompt to know when to type!
         if (processedCommand.startsWith('sudo ') && !processedCommand.includes(' -S')) {
-          processedCommand = processedCommand.replace(/^sudo /, 'sudo -S -p "" ');
+          processedCommand = processedCommand.replace(/^sudo /, 'sudo -S ');
         }
 
         console.log('IPC: Executing streaming command:', processedCommand);
@@ -330,9 +329,11 @@ class ElectronManager {
       });
 
       ipcMain.on('command-input', (event, text) => {
-        if (this.activeChild && this.activeChild.stdin) {
-          console.log('IPC: Sending input to terminal:', text);
+        if (this.activeChild && this.activeChild.stdin && this.activeChild.stdin.writable) {
+          console.log('IPC: Writing to stdin:', text);
           this.activeChild.stdin.write(text + '\n');
+        } else {
+          console.log('IPC: Cannot write to stdin (child not active or not writable)');
         }
       });
 
@@ -414,10 +415,25 @@ class ElectronManager {
       });
 
       ipcMain.handle('pick-path', async (event, options) => {
-        const result = await dialog.showOpenDialog(options || {
-          properties: ['openFile', 'openDirectory']
-        });
-        return result.canceled ? null : result.filePaths[0];
+        try {
+          const defaultOptions = {
+            properties: ['openFile', 'openDirectory', 'showHiddenFiles'],
+            defaultPath: app.getPath('home'),
+            title: 'Select File or Folder'
+          };
+          
+          // Merge provided options with defaults to preserve defaultPath
+          const finalOptions = { ...defaultOptions, ...(options || {}) };
+          console.log('IPC: Opening file dialog with options:', finalOptions);
+          
+          const result = await dialog.showOpenDialog(finalOptions);
+          console.log('IPC: Dialog result:', result.canceled ? 'Canceled' : result.filePaths[0]);
+          
+          return result.canceled ? null : result.filePaths[0];
+        } catch (err) {
+          console.error('IPC: pick-path error:', err);
+          return null;
+        }
       });
 
       console.log('IPC: Handlers registration complete.');

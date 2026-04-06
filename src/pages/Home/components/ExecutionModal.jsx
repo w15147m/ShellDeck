@@ -8,14 +8,26 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
   const handlePickLocation = async () => {
     try {
       if (window.electron && window.electron.pickPath) {
-        const path = await window.electron.pickPath({
-          properties: ['openFile', 'openDirectory']
+        // On Linux, mixing openFile and openDirectory can break the 'Select' button.
+        // We'll default to openFile as it's the most common requirement for installers/scripts.
+        const selectedPath = await window.electron.pickPath({
+          properties: ['openFile', 'showHiddenFiles'],
+          title: 'Select File'
         });
-        if (path) {
-          setLocationValue(path);
+        
+        if (selectedPath) {
+          setLocationValue(selectedPath);
+          
+          // Auto-fill target name from filename if it's currently empty
+          if (item.needsInput && !inputValue) {
+            const fileName = selectedPath.split(/[/\\]/).pop();
+            if (fileName) {
+              // Remove extension for a cleaner name
+              const cleanName = fileName.includes('.') ? fileName.split('.').slice(0, -1).join('.') : fileName;
+              setInputValue(cleanName || fileName);
+            }
+          }
         }
-      } else {
-        alert("Electron IPC not available.");
       }
     } catch (err) {
       console.error(err);
@@ -44,20 +56,6 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
       title={`Configure: ${item.title}`}
     >
       <div className="space-y-6">
-        {item.needsInput && (
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Target Name</label>
-            <input
-              autoFocus
-              type="text"
-              placeholder="Ex: myapp, update-package, etc."
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none font-medium"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-            />
-          </div>
-        )}
-
         {item.needsLocation && (
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">File or Directory Location</label>
@@ -66,17 +64,31 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
                 type="text"
                 readOnly
                 placeholder="No path selected"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 dark:text-gray-400 outline-none font-mono text-sm"
+                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 dark:text-gray-400 outline-none font-mono text-sm truncate"
                 value={locationValue}
               />
               <button
                 type="button"
                 onClick={handlePickLocation}
-                className="px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-600 transition-all shrink-0 shadow-sm"
+                className="px-6 py-3 bg-gray-900 dark:bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-700 transition-all shrink-0 shadow-sm"
               >
                 Browse
               </button>
             </div>
+          </div>
+        )}
+
+        {item.needsInput && (
+          <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-300">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Target Name</label>
+            <input
+              autoFocus={!item.needsLocation}
+              type="text"
+              placeholder="Ex: myapp, update-package, etc."
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none font-medium"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
           </div>
         )}
 
