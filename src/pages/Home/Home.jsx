@@ -4,8 +4,10 @@ import FilterBar from "../../common/components/FilterBar";
 import SettingsModal from "../../common/components/SettingsModal";
 import ItemCard from "./components/ItemCard";
 import ItemEditor from "./components/ItemEditor";
+import NoData from "../../common/components/NoData";
 import { ThemeProvider } from "../../common/context/ThemeContext";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../../common/constants";
+import { toastSuccess, toastError, swalConfirm } from "../../common/utils/swal.utils";
 
 const Home = () => {
   const [items, setItems] = useState([]);
@@ -65,16 +67,24 @@ const Home = () => {
       await window.electron.dbSaveItem(itemData);
       setIsEditorOpen(false);
       fetchItems();
+      toastSuccess(editingItem ? "Record updated" : "Record created!");
     } catch (err) {
       console.error('Database Save Failure:', err);
-      alert('Database Save Failure: ' + err.message);
+      toastError(err.message);
     }
   };
 
   const handleDeleteItem = async (id) => {
-    if (window.confirm("Are you sure you want to remove this record from the database?")) {
+    const isConfirmed = await swalConfirm({
+      title: "Delete Record?",
+      text: "This action cannot be undone.",
+      confirmText: "Yes, delete it"
+    });
+
+    if (isConfirmed.isConfirmed) {
       await window.electron.dbDeleteItem(id);
       fetchItems();
+      toastSuccess("Record deleted");
     }
   };
 
@@ -142,19 +152,10 @@ const Home = () => {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-80 text-center space-y-4">
-              <div className="p-4 bg-brand-500/10 rounded-full">
-                <svg className="size-12 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Full Database CRUD Test</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                  Click the plus button above to add a real record to your SQLite database.
-                </p>
-              </div>
-            </div>
+            <NoData 
+              title="Full Database CRUD Test"
+              message="Click the plus button above to add a real record to your SQLite database."
+            />
           )}
 
           {/* Version Footer */}
