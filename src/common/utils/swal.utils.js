@@ -77,9 +77,13 @@ export function swalConfirm({
     cancelButtonText: cancelText,
     denyButtonText: denyText,
     customClass: {
-      popup: 'dark:bg-gray-900 dark:border-gray-800 border rounded-2xl',
-      title: 'dark:text-white',
-      htmlContainer: 'dark:text-gray-400',
+      popup: 'dark:bg-gray-900 dark:border-gray-800 border rounded-2xl !p-6 !pb-5 !w-64',
+      title: 'dark:text-white !text-base !font-bold !p-0 !m-0',
+      htmlContainer: 'dark:text-gray-400 !text-xs !m-0 !mt-2',
+      icon: '!scale-50 !mx-auto !m-0 !mt-[-15px] !mb-[-5px]',
+      actions: '!m-0 !mt-4',
+      confirmButton: '!py-1.5 !px-4 !text-xs !rounded-xl !m-1',
+      cancelButton: '!py-1.5 !px-4 !text-xs !rounded-xl !m-1'
     }
   });
 }
