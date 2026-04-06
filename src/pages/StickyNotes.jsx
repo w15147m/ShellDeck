@@ -3,7 +3,7 @@ import NoteCard from "./components/NoteCard";
 import NoteEditor from "./components/NoteEditor";
 import StickyHeader from "./components/StickyHeader";
 import FilterBar from "./components/FilterBar";
-import SettingsModal from "./components/SettingsModal";
+import SettingsModal from "../common/components/SettingsModal";
 import { MAX_WINDOW_HEIGHT, APP_PADDING } from "../common/constants";
 import { ThemeProvider } from "../common/context/ThemeContext";
 import {

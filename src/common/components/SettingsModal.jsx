@@ -1,6 +1,6 @@
 import React from 'react';
-import { useTheme } from '../../common/context/ThemeContext';
-import { WINDOW_WIDTH, DEFAULT_HEIGHT } from '../../common/constants';
+import { useTheme } from '../context/ThemeContext';
+import { WINDOW_WIDTH, DEFAULT_HEIGHT } from '../constants';
 
 const SettingsModal = ({ onClose }) => {
   const { theme, toggleTheme } = useTheme();
