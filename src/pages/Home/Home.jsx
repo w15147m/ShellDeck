@@ -41,6 +41,32 @@ const Home = () => {
     return () => observer.disconnect();
   }, [isEditorOpen]);
 
+  // Handle Streaming Command Output
+  useEffect(() => {
+    if (window.electron && window.electron.onCommandOutput) {
+      window.electron.onCommandOutput((data) => {
+        setCommandOutputState(prev => {
+          if (!prev) return prev;
+          return { 
+            ...prev, 
+            output: (prev.output || '') + data.data 
+          };
+        });
+      });
+
+      window.electron.onCommandFinished((data) => {
+        setExecutingItemId(null);
+        setCommandOutputState(prev => prev ? { ...prev, isRunning: false } : null);
+      });
+    }
+
+    return () => {
+      if (window.electron && window.electron.removeCommandListeners) {
+        window.electron.removeCommandListeners();
+      }
+    };
+  }, []);
+
   // Fetch Items from Database
   const fetchItems = async () => {
     if (window.electron?.dbGetItems) {
@@ -115,20 +141,20 @@ const Home = () => {
     try {
       if (!commandText?.trim()) return toastError("No command text found to run.");
       
-      if (itemId) setExecutingItemId(itemId);
-      const result = await window.electron.executeCommand(commandText);
-      if (itemId) setExecutingItemId(null);
+      // Reset Modal and Show Immediately
+      setCommandOutputState({ 
+        title: itemTitle, 
+        output: '', 
+        error: null, 
+        isSuccess: true,
+        isRunning: true 
+      });
       
-      if (result.success) {
-        toastSuccess("Process Finished");
-        console.log("Bash Output:", result.output);
-        // Uncomment below to show success dumps
-        // setCommandOutputState({ title: itemTitle, output: result.output, error: null, isSuccess: true });
-      } else {
-        toastError("Process Failed");
-        console.error("Bash Error:", result.error);
-        setCommandOutputState({ title: itemTitle, output: null, error: result.error, isSuccess: false });
-      }
+      if (itemId) setExecutingItemId(itemId);
+      
+      // Start streaming
+      window.electron.executeCommandStream(commandText);
+      
     } catch (err) {
       if (itemId) setExecutingItemId(null);
       toastError("Failed to communicate with bridge.");
@@ -233,6 +259,7 @@ const Home = () => {
           title={commandOutputState.title}
           output={commandOutputState.output}
           error={commandOutputState.error}
+          isRunning={commandOutputState.isRunning}
           onClose={() => setCommandOutputState(null)}
         />
       )}

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage, globalSh
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { exec } from 'node:child_process';
+import { exec, spawn } from 'node:child_process';
 import util from 'node:util';
 
 const execAsync = util.promisify(exec);
@@ -265,7 +265,6 @@ class ElectronManager {
         return this.db.getItems();
       });
 
-      console.log('IPC: Registering execute-command');
       ipcMain.handle('execute-command', async (event, commandStr) => {
         try {
           const { stdout, stderr } = await execAsync(commandStr);
@@ -275,6 +274,33 @@ class ElectronManager {
           console.error('Command Error:', error);
           return { success: false, error: error.message };
         }
+      });
+
+      ipcMain.on('execute-command-stream', (event, commandStr) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (!win) return;
+
+        console.log('IPC: Executing streaming command:', commandStr);
+        
+        // Use shell: true to handle complex bash commands and pipes
+        const child = spawn(commandStr, [], { shell: true });
+
+        child.stdout.on('data', (data) => {
+          win.webContents.send('command-output', { type: 'stdout', data: data.toString() });
+        });
+
+        child.stderr.on('data', (data) => {
+          win.webContents.send('command-output', { type: 'stderr', data: data.toString() });
+        });
+
+        child.on('close', (code) => {
+          win.webContents.send('command-finished', { code });
+        });
+
+        child.on('error', (err) => {
+          win.webContents.send('command-output', { type: 'error', data: err.message });
+          win.webContents.send('command-finished', { code: 1 });
+        });
       });
 
       console.log('IPC: Registering db-save-item');

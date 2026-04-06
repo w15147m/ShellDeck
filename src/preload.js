@@ -9,6 +9,13 @@ contextBridge.exposeInMainWorld('electron', {
   updateAppSettings: (settings) => ipcRenderer.invoke('update-app-settings', settings),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   executeCommand: (command) => ipcRenderer.invoke('execute-command', command),
+  executeCommandStream: (command) => ipcRenderer.send('execute-command-stream', command),
+  onCommandOutput: (callback) => ipcRenderer.on('command-output', (event, data) => callback(data)),
+  onCommandFinished: (callback) => ipcRenderer.on('command-finished', (event, data) => callback(data)),
+  removeCommandListeners: () => {
+    ipcRenderer.removeAllListeners('command-output');
+    ipcRenderer.removeAllListeners('command-finished');
+  },
   dbGetItems: () => ipcRenderer.invoke('db-get-items'),
   dbSaveItem: (item) => ipcRenderer.invoke('db-save-item', item),
   dbDeleteItem: (id) => ipcRenderer.invoke('db-delete-item', id),

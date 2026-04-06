@@ -39,9 +39,20 @@ class DbManager {
       `);
 
       // Migration: Add columns to existing DB if it already existed
-      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsInput INTEGER DEFAULT 0;`); } catch (err) {}
-      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsLocation INTEGER DEFAULT 0;`); } catch (err) {}
-      try { this.db.exec(`ALTER TABLE items ADD COLUMN needsSudo INTEGER DEFAULT 0;`); } catch (err) {}
+      try { 
+        this.db.exec(`ALTER TABLE items ADD COLUMN needsInput INTEGER DEFAULT 0;`); 
+        console.log('Migration: added needsInput');
+      } catch (err) { console.log('Migration: needsInput already exists'); }
+      
+      try { 
+        this.db.exec(`ALTER TABLE items ADD COLUMN needsLocation INTEGER DEFAULT 0;`); 
+        console.log('Migration: added needsLocation');
+      } catch (err) { console.log('Migration: needsLocation already exists'); }
+      
+      try { 
+        this.db.exec(`ALTER TABLE items ADD COLUMN needsSudo INTEGER DEFAULT 0;`); 
+        console.log('Migration: added needsSudo');
+      } catch (err) { console.log('Migration: needsSudo already exists or error:', err.message); }
     } catch (err) {
       console.error('Failed to initialize database:', err);
     }

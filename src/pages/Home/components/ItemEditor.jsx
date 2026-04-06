@@ -17,21 +17,15 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
   useEffect(() => {
     if (item) {
       setFormData({
-        title: '',
-        content: '',
-        needsInput: false,
-        needsLocation: false,
-        needsSudo: false,
         status: 'To-do',
         statusColor: 'blue',
-        starred: false,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
         ...item,
         // Ensure booleans are always proper booleans, not 0/1 from SQLite
-        needsInput: !!item.needsInput,
-        needsLocation: !!item.needsLocation,
-        needsSudo: !!item.needsSudo,
-        starred: !!item.starred,
+        needsInput: !!item?.needsInput,
+        needsLocation: !!item?.needsLocation,
+        needsSudo: !!item?.needsSudo,
+        starred: !!item?.starred,
       });
     }
   }, [item]);
