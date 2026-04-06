@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, session, Tray, Menu, nativeImage, globalShortcut } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -47,6 +47,19 @@ class ElectronManager {
       this.createMainWindow();
       this.createTray();
       this.updateLoginItemSettings();
+
+      // Developer Tools Shortcuts
+      globalShortcut.register('CommandOrControl+R', () => {
+        if (this.mainWindow && this.mainWindow.isFocused()) {
+          this.mainWindow.reload();
+        }
+      });
+
+      globalShortcut.register('CommandOrControl+Shift+I', () => {
+        if (this.mainWindow && this.mainWindow.isFocused()) {
+          this.mainWindow.webContents.toggleDevTools();
+        }
+      });
     });
 
     app.on('activate', () => {
