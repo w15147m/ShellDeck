@@ -1,0 +1,117 @@
+# Electron Sticky Notes - Development & Build Guide
+
+This guide provides the necessary commands and steps to set up, run, and build the application.
+
+## 1. Prerequisites
+- Node.js (Latest LTS recommended)
+- npm (Node Package Manager)
+
+## 2. Initial Setup
+Clone the repository and install the dependencies:
+```bash
+npm install
+```
+
+## 3. Running the Application (Development)
+To start the application in development mode with Hot Module Replacement (HMR):
+```bash
+npm start
+```
+*Note: DevTools (Console) no longer opens by default. Use **Ctrl+Shift+I** to toggle it.*
+
+## 4. Packaging & Building (Production)
+
+### Package the App
+To bundle the application for your current platform without creating an installer:
+```bash
+npm run package
+```
+
+### Create Distributables (Makers)
+To create installers and packages (e.g., .deb, .rpm, .exe, .zip):
+```bash
+npm run make
+```
+The output will be generated in the `out/make` directory.
+
+
+### To Uninstall:
+Run the following command:
+```bash
+sudo apt remove sticky-notes
+
+
+
+sudo apt install ./out/make/deb/x64/sticky-notes_1.0.5_amd64.deb
+
+
+
+
+### Build Configuration
+The build is managed by **Electron Forge** with the **Vite** plugin.
+- **Main Config**: `vite.main.config.mjs`
+- **Preload Config**: `vite.preload.config.mjs`
+- **Renderer Config**: `vite.renderer.config.mjs`
+- **Forge Config**: `forge.config.js`
+
+## 5. Key Scripts
+| Command | Description |
+|---------|-------------|
+| `npm start` | Launches the app in development mode. |
+| `npm run package` | Bundles the app into an executable format. |
+| `npm run make` | Generates platform-specific installers. |
+| `npm run publish` | Publishes the app (if configured). |
+
+## 6. Layout Constants
+Window sizes and global paddings are managed centrally in:
+`src/common/constants.js`
+- `WINDOW_WIDTH`: Default 500px
+- `MAX_WINDOW_HEIGHT`: Default 700px
+
+
+```
+Alternatively, double-click the `.deb` file in the `out/make/deb/x64/` directory.
+
+
+```
+
+## 8. Cross-Platform Support
+Yes, the application is designed to be fully cross-platform (Windows, macOS, and Linux).
+
+### Icons
+To ensure the app icon looks perfect on every system, you should provide the following formats in `assets/icons/`:
+- **Linux**: `icon.png` (Already added)
+- **Windows**: `icon.ico`
+- **macOS**: `icon.icns`
+
+Electron Forge is configured to automatically pick the correct file extension based on the platform you are building for.
+
+### Building for Other Platforms
+- **To build for Windows**: It is recommended to run `npm run make` on a Windows machine. However, if you want to build for Windows from Ubuntu, follow the steps below.
+- **To build for macOS**: You **must** run `npm run make` on a macOS machine.
+- **To build for Linux**: You can run `npm run make` on Linux (which you just did).
+
+### Cross-Building for Windows from Ubuntu
+To create a Windows `.exe` installer (Squirrel.Windows) on Ubuntu, you need to install `mono` and `wine` with **32-bit support**:
+
+1.  **Install Dependencies**:
+    ```bash
+    sudo dpkg --add-architecture i386
+    sudo apt update
+    sudo apt install mono-complete wine wine32:i386
+    ```
+2.  **Run Build**:
+    ```bash
+    npm run make -- --platform=win32
+    ```
+    *Note: The first time you run this, it may take longer as it downloads the Windows-specific Electron binaries.*
+
+### Simplified Windows Build (No Installer)
+If you just need a folder with the `.exe` (without Squirrel dependencies), you can add a Zip maker for Windows in `forge.config.js`:
+```js
+{
+  name: '@electron-forge/maker-zip',
+  platforms: ['win32'],
+}
+```
+Then run: `npm run make -- --platform=win32`

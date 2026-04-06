@@ -1,0 +1,30 @@
+2026-02-07T14:13:01.025Z - Updating Login Item Settings: true
+2026-02-07T14:13:01.035Z - Platform: linux
+2026-02-07T14:13:01.035Z - Autostart Directory: /home/pc/.config/autostart
+2026-02-07T14:13:01.035Z - Desktop File Path: /home/pc/.config/autostart/sticky-notes.desktop
+2026-02-07T14:13:01.035Z - Writing desktop file... Content length: 401
+2026-02-07T14:13:01.035Z - Desktop file created successfully.
+2026-02-07T14:13:28.256Z - Updating Login Item Settings: false
+2026-02-07T14:13:28.256Z - Platform: linux
+2026-02-07T14:13:28.256Z - Autostart Directory: /home/pc/.config/autostart
+2026-02-07T14:13:28.256Z - Desktop File Path: /home/pc/.config/autostart/sticky-notes.desktop
+2026-02-07T14:13:28.257Z - Removing existing desktop file...
+2026-02-07T14:13:28.257Z - Desktop file removed.
+2026-02-07T14:13:32.465Z - Updating Login Item Settings: true
+2026-02-07T14:13:32.466Z - Platform: linux
+2026-02-07T14:13:32.466Z - Autostart Directory: /home/pc/.config/autostart
+2026-02-07T14:13:32.466Z - Desktop File Path: /home/pc/.config/autostart/sticky-notes.desktop
+2026-02-07T14:13:32.466Z - Writing desktop file... Content length: 401
+2026-02-07T14:13:32.467Z - Desktop file created successfully.
+2026-02-07T14:13:35.019Z - Updating Login Item Settings: true
+2026-02-07T14:13:35.020Z - Platform: linux
+2026-02-07T14:13:35.020Z - Autostart Directory: /home/pc/.config/autostart
+2026-02-07T14:13:35.020Z - Desktop File Path: /home/pc/.config/autostart/sticky-notes.desktop
+2026-02-07T14:13:35.020Z - Writing desktop file... Content length: 386
+2026-02-07T14:13:35.021Z - Desktop file created successfully.
+2026-02-07T14:13:37.259Z - Updating Login Item Settings: true
+2026-02-07T14:13:37.259Z - Platform: linux
+2026-02-07T14:13:37.259Z - Autostart Directory: /home/pc/.config/autostart
+2026-02-07T14:13:37.259Z - Desktop File Path: /home/pc/.config/autostart/sticky-notes.desktop
+2026-02-07T14:13:37.260Z - Writing desktop file... Content length: 401
+2026-02-07T14:13:37.260Z - Desktop file created successfully.

@@ -1,0 +1,9 @@
+export const WINDOW_WIDTH = 500;
+export const DEFAULT_HEIGHT = 650;
+export const MAX_WINDOW_HEIGHT = 750;
+export const MIN_WINDOW_HEIGHT = 200;
+export const MINI_WIDTH = 32;
+export const MINI_HEIGHT = 64;
+export const STANDALONE_WIDTH = 350;
+export const STANDALONE_HEIGHT = 350;
+export const APP_PADDING = 24; // Buffer for outer container padding/shadow
