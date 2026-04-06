@@ -94,35 +94,29 @@ const ItemEditor = ({ item, onSave, onDelete, onClose }) => {
         </div>
 
         <div className="space-y-3 py-3 border-t border-gray-100 dark:border-gray-800">
-          <label className="flex items-center justify-between cursor-pointer group">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors uppercase tracking-wider">
+          <div 
+            onClick={() => setFormData(prev => ({ ...prev, needsInput: !prev.needsInput }))}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors uppercase tracking-wider select-none">
               Need Target Name
             </span>
-            <div className="relative">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={formData.needsInput}
-                onChange={(e) => setFormData({ ...formData, needsInput: e.target.checked })}
-              />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-500"></div>
+            <div className={`w-9 h-5 rounded-full relative transition-colors ${formData.needsInput ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+              <div className={`absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform ${formData.needsInput ? 'translate-x-full border-white' : ''}`}></div>
             </div>
-          </label>
+          </div>
           
-          <label className="flex items-center justify-between cursor-pointer group">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors uppercase tracking-wider">
+          <div 
+            onClick={() => setFormData(prev => ({ ...prev, needsLocation: !prev.needsLocation }))}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors uppercase tracking-wider select-none">
               Need File/Location
             </span>
-            <div className="relative">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={formData.needsLocation}
-                onChange={(e) => setFormData({ ...formData, needsLocation: e.target.checked })}
-              />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-brand-500"></div>
+            <div className={`w-9 h-5 rounded-full relative transition-colors ${formData.needsLocation ? 'bg-brand-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+              <div className={`absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform ${formData.needsLocation ? 'translate-x-full border-white' : ''}`}></div>
             </div>
-          </label>
+          </div>
         </div>
 
         <div className="flex items-center gap-3 pt-2">
