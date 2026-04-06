@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electron', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   executeCommand: (command) => ipcRenderer.invoke('execute-command', command),
   executeCommandStream: (command) => ipcRenderer.send('execute-command-stream', command),
+  sendCommandInput: (text) => ipcRenderer.send('command-input', text),
   onCommandOutput: (callback) => ipcRenderer.on('command-output', (event, data) => callback(data)),
   onCommandFinished: (callback) => ipcRenderer.on('command-finished', (event, data) => callback(data)),
   removeCommandListeners: () => {

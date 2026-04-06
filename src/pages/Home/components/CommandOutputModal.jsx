@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Modal from '../../../common/components/Modal';
 
 const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
   const isError = !!error;
   const preRef = useRef(null);
+  const [userInput, setUserInput] = useState('');
 
   useEffect(() => {
     if (preRef.current) {
@@ -11,22 +12,23 @@ const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
     }
   }, [output, error]);
 
+  const handleSendInput = (e) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+    
+    if (window.electron && window.electron.sendCommandInput) {
+      window.electron.sendCommandInput(userInput);
+      setUserInput('');
+    }
+  };
+
   return (
     <Modal 
       isOpen={true} 
       onClose={onClose} 
-      title={`Terminal Output: ${title}`}
+      title={`Terminal: ${title}`}
     >
       <div className="space-y-4">
-        {isError && (
-          <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-bold text-sm">
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Execution Failed
-          </div>
-        )}
-
         <div className="bg-gray-900 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
           <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
             <div className="flex items-center gap-1.5">
@@ -40,25 +42,50 @@ const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
             {isRunning && (
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></div>
-                <span className="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Live Stream</span>
+                <span className="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Interactive</span>
               </div>
             )}
           </div>
           
-          <pre 
-            ref={preRef}
-            className="p-4 text-xs font-mono text-gray-300 overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar whitespace-pre-wrap"
-          >
-            {output || error || (isRunning ? 'Initializing stream...' : 'No output recorded.')}
-            {isRunning && <span className="inline-block w-2 h-4 ml-1 bg-brand-500 animate-pulse align-middle"></span>}
-          </pre>
+          <div className="flex flex-col max-h-[400px]">
+            <pre 
+              ref={preRef}
+              className="p-4 text-xs font-mono text-gray-300 overflow-x-auto overflow-y-auto custom-scrollbar whitespace-pre-wrap flex-1"
+            >
+              {output || error || (isRunning ? 'Starting session...' : 'No output recorded.')}
+              {isRunning && <span className="inline-block w-2 h-4 ml-1 bg-brand-500 animate-pulse align-middle"></span>}
+            </pre>
+
+            {isRunning && (
+              <form 
+                onSubmit={handleSendInput}
+                className="flex items-center gap-2 p-3 bg-black/40 border-t border-gray-800"
+              >
+                <span className="text-brand-500 font-mono text-xs font-bold">$</span>
+                <input
+                  autoFocus
+                  type="text"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Type password or command..."
+                  className="flex-1 bg-transparent border-none outline-none text-xs font-mono text-white placeholder:text-gray-600"
+                />
+                <button 
+                  type="submit"
+                  className="text-[10px] bg-brand-500/20 text-brand-500 px-2 py-0.5 rounded font-bold hover:bg-brand-500/30 transition-colors"
+                >
+                  SEND
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3 pt-2">
           <button 
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 px-6 text-gray-700 dark:text-white font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
+            className="flex-1 py-3 px-6 text-gray-700 dark:text-white font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
           >
             {isRunning ? 'Run in Background' : 'Close Terminal'}
           </button>

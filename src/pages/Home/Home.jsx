@@ -130,7 +130,7 @@ const Home = () => {
   };
 
   const handleRunCommand = (item) => {
-    if (item.needsInput || item.needsLocation || item.needsSudo) {
+    if (item.needsInput || item.needsLocation) {
       setPendingExecutionItem(item);
       return;
     }

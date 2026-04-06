@@ -4,7 +4,6 @@ import Modal from '../../../common/components/Modal';
 const ExecutionModal = ({ item, onProceed, onClose }) => {
   const [inputValue, setInputValue] = useState('');
   const [locationValue, setLocationValue] = useState('');
-  const [sudoPassword, setSudoPassword] = useState('');
 
   const handlePickLocation = async () => {
     try {
@@ -31,17 +30,12 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
     if (item.needsLocation && locationValue) {
       finalCommand += ` "${locationValue}"`;
     }
-    // Wrap with sudo -S if required (pipes password via stdin)
-    if (item.needsSudo && sudoPassword) {
-      finalCommand = `echo '${sudoPassword.replace(/'/g, `'\''`)}' | sudo -S -p '' ${finalCommand}`;
-    }
     onProceed(finalCommand);
   };
 
   const isProceedDisabled = 
     (item.needsInput && !inputValue.trim()) || 
-    (item.needsLocation && !locationValue.trim()) ||
-    (item.needsSudo && !sudoPassword.trim());
+    (item.needsLocation && !locationValue.trim());
 
   return (
     <Modal 
@@ -83,27 +77,6 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
                 Browse
               </button>
             </div>
-          </div>
-        )}
-
-        {item.needsSudo && (
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-red-500 ml-1">Sudo Password</label>
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="Enter your system password"
-                className="w-full px-4 py-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-xl focus:ring-2 focus:ring-red-500 transition-all text-gray-900 dark:text-white outline-none font-medium"
-                value={sudoPassword}
-                onChange={(e) => setSudoPassword(e.target.value)}
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-[10px] text-red-500/70 ml-1">Used once for this execution only. Never stored.</p>
           </div>
         )}
 

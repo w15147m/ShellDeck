@@ -26,6 +26,7 @@ class ElectronManager {
     this.APP_SETTINGS_PATH = path.join(app.getPath('userData'), 'app-settings.json');
     this.DATABASE_PATH = path.join(app.getPath('userData'), 'database.sqlite');
     this.db = new DbManager(this.DATABASE_PATH);
+    this.activeChild = null;
   }
 
   init() {
@@ -280,27 +281,59 @@ class ElectronManager {
         const win = BrowserWindow.fromWebContents(event.sender);
         if (!win) return;
 
-        console.log('IPC: Executing streaming command:', commandStr);
+        const safeSend = (channel, data) => {
+          if (win && !win.isDestroyed() && !win.webContents.isDestroyed()) {
+            win.webContents.send(channel, data);
+          }
+        };
+
+        // Kill existing if any
+        if (this.activeChild) {
+          try { 
+            this.activeChild.stdin.end();
+            this.activeChild.kill(); 
+          } catch (e) {}
+        }
+
+        let processedCommand = commandStr.trim();
         
-        // Use shell: true to handle complex bash commands and pipes
-        const child = spawn(commandStr, [], { shell: true });
+        // Auto-handle sudo: inject -S to read from stdin (our app) instead of TTY
+        // We use -S and a blank prompt so the prompt text itself doesn't clutter our UI,
+        // but it still waits for input on stdin.
+        if (processedCommand.startsWith('sudo ') && !processedCommand.includes(' -S')) {
+          processedCommand = processedCommand.replace(/^sudo /, 'sudo -S -p "" ');
+        }
 
-        child.stdout.on('data', (data) => {
-          win.webContents.send('command-output', { type: 'stdout', data: data.toString() });
+        console.log('IPC: Executing streaming command:', processedCommand);
+        
+        this.activeChild = spawn(processedCommand, [], { shell: true });
+
+        this.activeChild.stdout.on('data', (data) => {
+          safeSend('command-output', { type: 'stdout', data: data.toString() });
         });
 
-        child.stderr.on('data', (data) => {
-          win.webContents.send('command-output', { type: 'stderr', data: data.toString() });
+        this.activeChild.stderr.on('data', (data) => {
+          // sudo prompts and errors usually come through stderr
+          safeSend('command-output', { type: 'stderr', data: data.toString() });
         });
 
-        child.on('close', (code) => {
-          win.webContents.send('command-finished', { code });
+        this.activeChild.on('close', (code) => {
+          this.activeChild = null;
+          safeSend('command-finished', { code });
         });
 
-        child.on('error', (err) => {
-          win.webContents.send('command-output', { type: 'error', data: err.message });
-          win.webContents.send('command-finished', { code: 1 });
+        this.activeChild.on('error', (err) => {
+          this.activeChild = null;
+          safeSend('command-output', { type: 'error', data: err.message });
+          safeSend('command-finished', { code: 1 });
         });
+      });
+
+      ipcMain.on('command-input', (event, text) => {
+        if (this.activeChild && this.activeChild.stdin) {
+          console.log('IPC: Sending input to terminal:', text);
+          this.activeChild.stdin.write(text + '\n');
+        }
       });
 
       console.log('IPC: Registering db-save-item');
