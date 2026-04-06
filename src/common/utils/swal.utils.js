@@ -1,25 +1,12 @@
 import Swal from 'sweetalert2';
-
-// Create a generic toast mixin for notifications
-const toast = Swal.mixin({
-  toast: true,
-  position: 'top-end',
-  showConfirmButton: false,
-  timerProgressBar: true,
-  didOpen: (toastEl) => {
-    toastEl.addEventListener('mouseenter', Swal.stopTimer);
-    toastEl.addEventListener('mouseleave', Swal.resumeTimer);
-  }
-});
+import toast from 'react-hot-toast';
 
 /**
  * Display a success toast notification
  */
 export function toastSuccess(message) {
-  toast.fire({
-    icon: "success",
-    timer: 3000,
-    title: message || "Action completed successfully",
+  toast.success(message || "Action completed successfully", {
+    duration: 3000
   });
 }
 
@@ -27,10 +14,8 @@ export function toastSuccess(message) {
  * Display an error toast notification
  */
 export function toastError(message, timer = 3000) {
-  toast.fire({
-    icon: "error",
-    timer: timer,
-    title: message || "Something went wrong\nTry Later",
+  toast.error(message || "Something went wrong\nTry Later", {
+    duration: timer
   });
 }
 
@@ -38,10 +23,14 @@ export function toastError(message, timer = 3000) {
  * Display a warning toast notification
  */
 export function toastWarning(message, timer = 3000) {
-  toast.fire({
-    icon: "warning",
-    timer: timer,
-    title: message || "Warning",
+  toast(message || "Warning", {
+    icon: '⚠️',
+    duration: timer,
+    style: {
+      background: '#fffbeb', // yellow-50
+      color: '#92400e', // yellow-800
+      border: '1px solid #fcd34d' // yellow-300
+    }
   });
 }
 

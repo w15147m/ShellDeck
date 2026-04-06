@@ -47,6 +47,7 @@
     "better-sqlite3": "^12.8.0",
     "electron-squirrel-startup": "^1.0.1",
     "react-color": "^2.19.3",
+    "react-hot-toast": "^2.6.0",
     "sweetalert2": "^11.26.24"
   }
 }
