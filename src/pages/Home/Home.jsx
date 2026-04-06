@@ -30,7 +30,7 @@ const Home = () => {
   useEffect(() => {
     if (!window.electron || !window.electron.setWindowHeight || !containerRef.current) return;
     const observer = new ResizeObserver(() => {
-      if (isEditorOpen) {
+      if (isEditorOpen || commandOutputState) {
         window.electron.setWindowHeight(MAX_WINDOW_HEIGHT);
       } else {
         const contentHeight = containerRef.current.scrollHeight;
@@ -39,7 +39,7 @@ const Home = () => {
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [isEditorOpen]);
+  }, [isEditorOpen, commandOutputState]);
 
   // Handle Streaming Command Output
   useEffect(() => {

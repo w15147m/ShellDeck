@@ -26,10 +26,30 @@ const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
     <Modal 
       isOpen={true} 
       onClose={onClose} 
-      title={`Terminal: ${title}`}
+      hideHeader={true}
     >
-      <div className="space-y-4">
-        <div className="bg-gray-900 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 shadow-inner">
+      <div className="flex flex-col">
+        {/* Compact Custom Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+              Terminal: {title}
+            </span>
+            {isRunning && (
+              <span className="flex items-center gap-1 bg-brand-500/10 text-brand-500 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter animate-pulse">
+                Live
+              </span>
+            )}
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="bg-gray-900 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner">
           <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
@@ -39,18 +59,12 @@ const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
                 Bash Console
               </span>
             </div>
-            {isRunning && (
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></div>
-                <span className="text-[9px] font-bold text-brand-500 uppercase tracking-tighter">Interactive</span>
-              </div>
-            )}
           </div>
           
-          <div className="flex flex-col max-h-[400px]">
+          <div className="flex flex-col h-[350px]">
             <pre 
               ref={preRef}
-              className="p-4 text-xs font-mono text-gray-300 overflow-x-auto overflow-y-auto custom-scrollbar whitespace-pre-wrap flex-1"
+              className="p-4 text-xs font-mono text-gray-300 overflow-x-auto overflow-y-auto custom-scrollbar whitespace-pre-wrap flex-1 bg-black/20"
             >
               {output || error || (isRunning ? 'Starting session...' : 'No output recorded.')}
               {isRunning && <span className="inline-block w-2 h-4 ml-1 bg-brand-500 animate-pulse align-middle"></span>}
@@ -79,16 +93,6 @@ const CommandOutputModal = ({ title, output, error, isRunning, onClose }) => {
               </form>
             )}
           </div>
-        </div>
-
-        <div className="flex items-center gap-3 pt-2">
-          <button 
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-3 px-6 text-gray-700 dark:text-white font-bold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all shadow-sm"
-          >
-            {isRunning ? 'Run in Background' : 'Close Terminal'}
-          </button>
         </div>
       </div>
     </Modal>
