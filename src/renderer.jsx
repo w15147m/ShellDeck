@@ -1,20 +1,11 @@
 import { createRoot } from 'react-dom/client';
-import StickyNotes from './pages/StickyNotes';
-import StandaloneNote from './pages/StandaloneNote';
+import Home from './pages/Home';
 import './index.css';
 
 const App = () =>{
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    
-    if (mode === 'standalone') {
-        const noteId = urlParams.get('id');
-        return <StandaloneNote noteId={noteId} />;
-    }
-
     return (
         <>
-            <StickyNotes />
+            <Home />
         </>
     )
 };
