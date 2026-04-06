@@ -22,39 +22,34 @@ const ItemEditor = ({ item, onSave, onClose }) => {
     onSave(formData);
   };
 
-  const footer = (
-    <>
-      <button 
-        type="submit"
-        form="item-form"
-        className="flex-1 py-3 px-6 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all"
-      >
-        {item ? 'Save Changes' : 'Create Record'}
-      </button>
-      <button 
-        type="button"
-        onClick={onClose}
-        className="py-3 px-6 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl transition-all"
-      >
-        Cancel
-      </button>
-    </>
-  );
-
   return (
     <Modal 
       isOpen={true} 
       onClose={onClose} 
-      title={item ? 'Edit Record' : 'New Database Record'}
-      footer={footer}
+      hideHeader={true}
+      title={null}
+      footer={null}
     >
-      <form id="item-form" onSubmit={handleSubmit} className="space-y-4">
+      <form id="item-form" onSubmit={handleSubmit} className="space-y-3">
+        
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            {item ? 'Edit Command' : 'New Command Build'}
+          </h2>
+          <button 
+            type="button"
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all"
+          >
+            ✕
+          </button>
+        </div>
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Title</label>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Command Name</label>
           <input
             autoFocus
             type="text"
-            placeholder="Ex: Weekly Report"
+            placeholder="Ex: Weekly System Update"
             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none font-medium"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -63,39 +58,37 @@ const ItemEditor = ({ item, onSave, onClose }) => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Status</label>
-          <div className="flex gap-2">
-            {['To-do', 'Ready', 'In-Progress'].map(s => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setFormData({ 
-                    ...formData, 
-                    status: s, 
-                    statusColor: s === 'Ready' ? 'success' : s === 'To-do' ? 'blue' : 'error' 
-                })}
-                className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
-                  formData.status === s 
-                  ? 'bg-brand-500 border-brand-500 text-white' 
-                  : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:bg-brand-50'
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Content</label>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Terminal Command</label>
           <textarea
-            placeholder="Add details..."
+            autoFocus={!!item}
+            placeholder='Ex: echo "System is active"'
             rows={4}
-            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none resize-none"
+            className="w-full font-mono px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none resize-none"
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                handleSubmit(e);
+              }
+            }}
           />
+        </div>
+
+        <div className="flex items-center gap-3 pt-2">
+          <button 
+            type="submit"
+            className="flex-1 py-3 px-6 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all"
+          >
+            {item ? 'Save Command' : 'Create Command'}
+          </button>
+          <button 
+            type="button"
+            onClick={onClose}
+            className="py-3 px-6 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-2xl transition-all"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </Modal>
