@@ -10,6 +10,7 @@ import {
   STANDALONE_WIDTH, 
   STANDALONE_HEIGHT 
 } from './common/constants.js';
+import DbManager from './db-manager.js';
 
 class ElectronManager {
   constructor() {
@@ -18,6 +19,8 @@ class ElectronManager {
     this.WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
     this.STANDALONE_STATES_PATH = path.join(app.getPath('userData'), 'standalone-states.json');
     this.APP_SETTINGS_PATH = path.join(app.getPath('userData'), 'app-settings.json');
+    this.DATABASE_PATH = path.join(app.getPath('userData'), 'database.sqlite');
+    this.db = new DbManager(this.DATABASE_PATH);
   }
 
   init() {
@@ -299,6 +302,19 @@ class ElectronManager {
 
     ipcMain.handle('get-app-version', () => {
       return `v${app.getVersion()}`;
+    });
+
+    // Database Handlers
+    ipcMain.handle('db-get-items', () => {
+      return this.db.getItems();
+    });
+
+    ipcMain.handle('db-save-item', (event, item) => {
+      return this.db.saveItem(item);
+    });
+
+    ipcMain.handle('db-delete-item', (event, id) => {
+      return this.db.deleteItem(id);
     });
   }
 

@@ -8,4 +8,7 @@ contextBridge.exposeInMainWorld('electron', {
   getAppSettings: () => ipcRenderer.invoke('get-app-settings'),
   updateAppSettings: (settings) => ipcRenderer.invoke('update-app-settings', settings),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  dbGetItems: () => ipcRenderer.invoke('db-get-items'),
+  dbSaveItem: (item) => ipcRenderer.invoke('db-save-item', item),
+  dbDeleteItem: (id) => ipcRenderer.invoke('db-delete-item', id),
 });
