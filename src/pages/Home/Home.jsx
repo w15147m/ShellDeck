@@ -191,6 +191,7 @@ const Home = () => {
         <ItemEditor 
           item={editingItem}
           onSave={handleSaveItem}
+          onDelete={(id) => { handleDeleteItem(id); setIsEditorOpen(false); }}
           onClose={() => setIsEditorOpen(false)}
         />
       )}
