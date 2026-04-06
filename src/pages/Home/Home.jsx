@@ -177,13 +177,13 @@ const Home = () => {
               message="Click the plus button above to add a real record to your SQLite database."
             />
           )}
+        </div>
 
-          {/* Version Footer */}
-          <div className="w-full flex justify-end opacity-20 select-none mt-auto pt-4">
-            <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">
-              SQLite ACTIVE • {appVersion}
-            </span>
-          </div>
+        {/* Version Footer */}
+        <div className="w-full flex justify-end opacity-20 select-none px-6 pb-4 pt-2 shrink-0 bg-gray-50/50 dark:bg-gray-900/50">
+          <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">
+            SQLite ACTIVE • {appVersion}
+          </span>
         </div>
       </div>
 
