@@ -299,8 +299,9 @@ class ElectronManager {
         
         // Auto-handle sudo: inject -S to read from stdin (our app) instead of TTY
         // We removed -p "" because users NEED to see the prompt to know when to type!
-        if (processedCommand.startsWith('sudo ') && !processedCommand.includes(' -S')) {
-          processedCommand = processedCommand.replace(/^sudo /, 'sudo -S ');
+        // Using a regex to catch 'sudo' even if it's preceded by 'cd ... &&'
+        if (/\bsudo\s/.test(processedCommand) && !processedCommand.includes('sudo -S')) {
+          processedCommand = processedCommand.replace(/\bsudo\s/g, 'sudo -S ');
         }
 
         console.log('IPC: Executing streaming command:', processedCommand);

@@ -25,12 +25,8 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
           setLocationValue(dirPath);
           setSelectedFileName(fileName || '');
           
-          // Auto-fill target name from filename if it's currently empty
-          if (item.needsInput && !inputValue && fileName) {
-            // Remove extension for a cleaner name in the 'Target' box
-            const cleanName = fileName.includes('.') ? fileName.split('.').slice(0, -1).join('.') : fileName;
-            setInputValue(cleanName || fileName);
-          }
+          // Auto-fill target name logic removed to prevent double-argument errors (e.g., apt install name file)
+          // If you need a custom name, you can still type it manually.
         }
       }
     } catch (err) {
@@ -59,7 +55,7 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
   const previewCommand = getFinalCommand();
 
   const isProceedDisabled = 
-    (item.needsInput && !inputValue.trim()) || 
+    (item.needsInput && !item.needsLocation && !inputValue.trim()) || 
     (item.needsLocation && !locationValue.trim());
 
   return (
@@ -97,7 +93,7 @@ const ExecutionModal = ({ item, onProceed, onClose }) => {
             <input
               autoFocus={!item.needsLocation}
               type="text"
-              placeholder="Ex: myapp, update-package, etc."
+              placeholder={item.needsLocation ? "Optional arguments (e.g. -y, --force)" : "Ex: myapp, update-package, etc."}
               className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-[0.5px] border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-brand-500 transition-all text-gray-900 dark:text-white outline-none font-medium"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
